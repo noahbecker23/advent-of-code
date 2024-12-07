@@ -5,7 +5,7 @@ import os
 
 ### Change output directory
 
-dir = 'Z:/Learning/Advent of Code/2023/1a'
+dir = 'Z:/Learning/Advent of Code/2023/01/a'
 os.chdir(dir)
 
 
