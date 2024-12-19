@@ -33,7 +33,6 @@ def get_output(input):
     n_rotations = 0
     obstacles = []
     while position != '0':
-        print(input)
         coords = np.where(input == '^')
         if input[coords[0][0] - 1][coords[1][0]] == '#':
             last_rotate = True
@@ -86,8 +85,6 @@ def get_output(input):
                     input = np.rot90(input)
                 else:
                     obstacles.append(np.where(input == 'O'))
-                print(input)
-                print(obstacles)
                 input[coords[0][0] - 2][coords[1][0]] = old_value
             input[coords[0][0] - 1][coords[1][0]] = '^'
             last_rotate = False
@@ -106,25 +103,66 @@ def main(data):
 
     def get_output(input):
         position = '.'
+        last_rotate = False
+        n_rotations = 0
+        obstacles = []
         while position != '0':
             coords = np.where(input == '^')
-            if input[coords[0][0] - 1][coords[1][0]] == '#' or input[coords[0][0] - 1][coords[1][0]] == '1' or input[coords[0][0] - 1][coords[1][0]] == '2' or input[coords[0][0] - 1][coords[1][0]] == '3':
-                if len(np.where(input == '3')) != 0:
-                    old_coords = np.where(input == '3')
-                    input[old_coords[0][0]][old_coords[1][0]] = '#'
-                if len(np.where(input == '2')) != 0:
-                    old_coords = np.where(input == '2')
-                    input[old_coords[0][0]][old_coords[1][0]] = '3'
-                if len(np.where(input == '1')) != 0:
-                    old_coords = np.where(input == '1')
-                    input[old_coords[0][0]][old_coords[1][0]] = '2'
-                input[coords[0][0] - 1][coords[1][0]] = '1'
+            if input[coords[0][0] - 1][coords[1][0]] == '#':
+                last_rotate = True
+                n_rotations += 1
                 input = np.rot90(input)
             else:
                 position = input[coords[0][0] - 1][coords[1][0]]
-                input[coords[0][0]][coords[1][0]] = 'X'
+                if position == '1' or position == '2' or position == '3':
+                    pass
+                else:
+                    if last_rotate == True:
+                        if len(np.where(input == '3')[0]) != 0:
+                            old_coords = np.where(input == '3')
+                            input[old_coords[0][0]][old_coords[1][0]] = 'X'
+                        if len(np.where(input == '2')[0]) != 0:
+                            old_coords = np.where(input == '2')
+                            input[old_coords[0][0]][old_coords[1][0]] = '3'
+                        if len(np.where(input == '1')[0]) != 0:
+                            old_coords = np.where(input == '1')
+                            input[old_coords[0][0]][old_coords[1][0]] = '2'
+                        input[coords[0][0]][coords[1][0]] = '1'
+                        if len(np.where(input == '3')[0]) != 0:
+                            if len(np.where(input == '4')[0]) != 0:
+                                old_coords =  np.where(input == '4')
+                                input[old_coords[0][0]][old_coords[1][0]] = '.'
+                            if (input[np.where(input == '3')[0][0]][np.where(input == '1')[1][0]] != '#') & (np.where(input == '1')[1][0] != 1):
+                                input[np.where(input == '3')[0][0]][np.where(input == '1')[1][0]] = '4'
+                    else:
+                        input[coords[0][0]][coords[1][0]] = 'X'
+                if input[coords[0][0] - 1][coords[1][0]] == '4':
+                    old_value = input[coords[0][0] - 2][coords[1][0]]
+                    input[coords[0][0] - 2][coords[1][0]] = 'O'
+                    if math.modf(n_rotations / 4)[0] == 0.25:
+                        input = np.rot90(input)
+                        input = np.rot90(input)
+                        input = np.rot90(input)
+                        obstacles.append(np.where(input == 'O'))
+                        input = np.rot90(input)
+                    elif math.modf(n_rotations / 4)[0] == 0.50:
+                        input = np.rot90(input)
+                        input = np.rot90(input)
+                        obstacles.append(np.where(input == 'O'))
+                        input = np.rot90(input)
+                        input = np.rot90(input)
+                    elif math.modf(n_rotations / 4)[0] == 0.75:
+                        input = np.rot90(input)
+                        obstacles.append(np.where(input == 'O'))
+                        input = np.rot90(input)
+                        input = np.rot90(input)
+                        input = np.rot90(input)
+                    else:
+                        obstacles.append(np.where(input == 'O'))
+                    input[coords[0][0] - 2][coords[1][0]] = old_value
                 input[coords[0][0] - 1][coords[1][0]] = '^'
-        return len(np.where(input == 'X')[0])
+                last_rotate = False
+        return len(obstacles)
 
     return get_output(data)
 
