@@ -35,8 +35,23 @@ def get_output(input):
         if frequencies[i] == '.':
             pass
         else:
-            antennae = np.where(input == frequencies[i])
-    return
+            antennae = pd.DataFrame(np.where(input == frequencies[i])).transpose()
+            antennae.columns = ['x', 'y']
+            for j in range(len(antennae)):
+                antenna = antennae.iloc[j]
+                others  = antennae.drop(j)
+                others['prev_x'] = antenna['x']
+                others['prev_y'] = antenna['y']
+                others['diff_x'] = others['x'] - others['prev_x']
+                others['diff_y'] = others['y'] - others['prev_y']
+                others['antinode_x'] = others['x'] + others['diff_x']
+                others['antinode_y'] = others['y'] + others['diff_y']
+                for k in range(len(others)):
+                    if (others.iloc[k]['antinode_x'] >= 0) & (others.iloc[k]['antinode_x'] < input.shape[0]) & (others.iloc[k]['antinode_y'] >= 0) & (others.iloc[k]['antinode_y'] < input.shape[1]):
+                        antinodes.add(tuple([others.iloc[k]['antinode_x'], others.iloc[k]['antinode_y']]))
+                    else:
+                        pass
+    return len(antinodes)
 
 get_output(data_ex)
 
@@ -47,19 +62,31 @@ def main(data):
     data = data.splitlines()
     data = [list(x) for x in data]
     data = np.array(data)
-    data = np.pad(data, pad_width=1, mode='constant', constant_values=0)
 
     def get_output(input):
-        position = '.'
-        while position != '0':
-            coords = np.where(input == '^')
-            if input[coords[0][0] - 1][coords[1][0]] == '#':
-                input = np.rot90(input)
+        frequencies = np.unique(input).tolist()
+        antinodes   = set()
+        for i in range(len(frequencies)):
+            if frequencies[i] == '.':
+                pass
             else:
-                position = input[coords[0][0] - 1][coords[1][0]]
-                input[coords[0][0]][coords[1][0]] = 'X'
-                input[coords[0][0] - 1][coords[1][0]] = '^'
-        return len(np.where(input == 'X')[0])
+                antennae = pd.DataFrame(np.where(input == frequencies[i])).transpose()
+                antennae.columns = ['x', 'y']
+                for j in range(len(antennae)):
+                    antenna = antennae.iloc[j]
+                    others  = antennae.drop(j)
+                    others['prev_x'] = antenna['x']
+                    others['prev_y'] = antenna['y']
+                    others['diff_x'] = others['x'] - others['prev_x']
+                    others['diff_y'] = others['y'] - others['prev_y']
+                    others['antinode_x'] = others['x'] + others['diff_x']
+                    others['antinode_y'] = others['y'] + others['diff_y']
+                    for k in range(len(others)):
+                        if (others.iloc[k]['antinode_x'] >= 0) & (others.iloc[k]['antinode_x'] < input.shape[0]) & (others.iloc[k]['antinode_y'] >= 0) & (others.iloc[k]['antinode_y'] < input.shape[1]):
+                            antinodes.add(tuple([others.iloc[k]['antinode_x'], others.iloc[k]['antinode_y']]))
+                        else:
+                            pass
+        return len(antinodes)
 
     return get_output(data)
 
